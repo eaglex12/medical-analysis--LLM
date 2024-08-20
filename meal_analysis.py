@@ -1,18 +1,28 @@
 import openai
 import json
+from dotenv import load_dotenv
+import os
 
-# Load input data from input.json
-with open('input.json') as f:
-    input_data = json.load(f)
+# Load environment variables from the .env file
+load_dotenv()
 
-# OpenAI API initialization (replace 'your_openai_api_key' with your actual API key)
-openai.api_key = 'your_openai_api_key'
+# OpenAI API initialization using the API key from the environment
+openai.api_key = os.getenv("OPENAI_KEY")
+
+if openai.api_key is None:
+    raise ValueError("OpenAI API key is missing! Please ensure it's set in your .env file as OPENAI_KEY.")
 
 def generate_response(profile_context, latest_query, chat_context):
     # Extract useful information
-    patient_profile = profile_context['patient_profile']
-    diet_chart = profile_context['diet_chart']
+    patient_profile = profile_context.get('patient_profile', 'No profile available')
+    diet_chart = profile_context.get('diet_chart', 'No diet chart available')
     
+    # Ensure latest_query has at least one message
+    if not latest_query:
+        return "Unable to generate response, no latest query found."
+
+    last_message = latest_query[-1].get('message', 'No message found')
+
     # Create a prompt for LLM
     prompt = f"""
     You are a healthcare AI specializing in dietary management. 
@@ -21,29 +31,43 @@ def generate_response(profile_context, latest_query, chat_context):
     Patient profile: {patient_profile}
     Diet chart: {diet_chart}
 
-    The patient just sent a message: {latest_query[-1]['message']}
+    The patient just sent a message: {last_message}
 
     Please analyze the message, understand the context from the chat history, 
     and provide an appropriate, personalized response based on their diet and medical conditions.
     """
 
-    # Call OpenAI API to generate a response
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=150
-    )
+    try:
+        # Call OpenAI API to generate a response
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            max_tokens=150,
+            temperature=0.7,  # Adjust creativity
+            stop=["\n"]  # Add stop sequence to control response
+        )
 
-    return response.choices[0].text.strip()
+        return response.choices[0].text.strip()
+
+    except Exception as e:
+        return f"Error generating response: {str(e)}"
+
+# Load input data from input.json
+try:
+    with open('input.json') as f:
+        input_data = json.load(f)
+except FileNotFoundError:
+    print("input.json file not found.")
+    exit(1)
 
 # Iterate through patient queries and generate responses
 output_data = []
 
 for query_obj in input_data:
-    ticket_id = query_obj['chat_context']['ticket_id']
-    latest_query = query_obj['latest_query']
-    ideal_response = query_obj['ideal_response']
-    
+    ticket_id = query_obj['chat_context'].get('ticket_id', 'No ticket ID')
+    latest_query = query_obj.get('latest_query', [])
+    ideal_response = query_obj.get('ideal_response', 'No ideal response provided')
+
     # Generate response using LLM
     generated_response = generate_response(query_obj['profile_context'], latest_query, query_obj['chat_context'])
 
@@ -55,7 +79,7 @@ for query_obj in input_data:
         'ideal_response': ideal_response
     })
 
-# Save output data to JSON file
+# Save output data to output.json
 with open('output.json', 'w') as f:
     json.dump(output_data, f, indent=4)
 
