@@ -12,7 +12,7 @@ This project utilizes Google's Gemini models for meal analysis. The setup involv
 
 2. **Download the JSON File:**
 
-   - Use the provided script to download the necessary JSON file. Run the following command:
+   - Use the provided script to download the necessary list of sample queries from the URL given in Job Description. Run the following command:
      ```bash
      python download_queries.py
      ```
