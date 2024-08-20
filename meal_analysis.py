@@ -3,27 +3,22 @@ import json
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from the .env file
 load_dotenv()
 
-# OpenAI API initialization using the API key from the environment
 openai.api_key = os.getenv("OPENAI_KEY")
 
 if openai.api_key is None:
     raise ValueError("OpenAI API key is missing! Please ensure it's set in your .env file as OPENAI_KEY.")
 
 def generate_response(profile_context, latest_query, chat_context):
-    # Extract useful information
     patient_profile = profile_context.get('patient_profile', 'No profile available')
     diet_chart = profile_context.get('diet_chart', 'No diet chart available')
     
-    # Ensure latest_query has at least one message
     if not latest_query:
         return "Unable to generate response, no latest query found."
 
     last_message = latest_query[-1].get('message', 'No message found')
 
-    # Create a prompt for LLM
     prompt = f"""
     You are a healthcare AI specializing in dietary management. 
     You have the following patient information:
@@ -38,13 +33,12 @@ def generate_response(profile_context, latest_query, chat_context):
     """
 
     try:
-        # Call OpenAI API to generate a response
         response = openai.Completion.create(
             engine="text-davinci-003",
             prompt=prompt,
             max_tokens=150,
-            temperature=0.7,  # Adjust creativity
-            stop=["\n"]  # Add stop sequence to control response
+            temperature=0.7,  
+            stop=["\n"]  #
         )
 
         return response.choices[0].text.strip()
@@ -52,7 +46,6 @@ def generate_response(profile_context, latest_query, chat_context):
     except Exception as e:
         return f"Error generating response: {str(e)}"
 
-# Load input data from input.json
 try:
     with open('input.json') as f:
         input_data = json.load(f)
@@ -60,7 +53,6 @@ except FileNotFoundError:
     print("input.json file not found.")
     exit(1)
 
-# Iterate through patient queries and generate responses
 output_data = []
 
 for query_obj in input_data:
@@ -68,10 +60,8 @@ for query_obj in input_data:
     latest_query = query_obj.get('latest_query', [])
     ideal_response = query_obj.get('ideal_response', 'No ideal response provided')
 
-    # Generate response using LLM
     generated_response = generate_response(query_obj['profile_context'], latest_query, query_obj['chat_context'])
 
-    # Save result
     output_data.append({
         'ticket_id': ticket_id,
         'latest_query': latest_query,
@@ -79,7 +69,6 @@ for query_obj in input_data:
         'ideal_response': ideal_response
     })
 
-# Save output data to output.json
 with open('output.json', 'w') as f:
     json.dump(output_data, f, indent=4)
 
