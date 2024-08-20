@@ -34,7 +34,7 @@ def generate_response(profile_context, latest_query, chat_context):
 
     try:
         response = openai.Completion.create(
-            engine="text-davinci-003",
+            engine="gpt-3.5-turbo",
             prompt=prompt,
             max_tokens=150,
             temperature=0.7,  
