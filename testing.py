@@ -1,30 +1,18 @@
-import openai
-from dotenv import load_dotenv, get_key
-
-# Load environment variables from .env
+import google.generativeai as genai
+import os
+from dotenv import load_dotenv
 load_dotenv()
 
-# Get the OpenAI API key
-openai.api_key = get_key('.env', 'OPENAI_KEY')
+genai.configure(api_key=os.getenv("GEM"))
 
-# Test function to check if OpenAI API is responding
-def test_openai_response():
-    try:
-        # Example prompt for testing
-        prompt = "Say hello!"
-        
-        # Request to OpenAI API
-        response = openai.Completion.create(
-            engine="gpt-3.5-turbo",
-            prompt=prompt,
-            max_tokens=10
-        )
-        
-        # Print the response
-        print("OpenAI Response:", response.choices[0].text.strip())
-    
-    except Exception as e:
-        print("Error connecting to OpenAI:", e)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
-# Run the test
-test_openai_response()
+prompt = "Write a story about a magic backpack."
+
+# Generate content
+try:
+    response = model.generate_content([prompt])
+    print("Generated Response:")
+    print(response.text.strip())
+except Exception as e:
+    print(f"Error generating content: {e}")

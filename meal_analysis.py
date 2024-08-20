@@ -1,48 +1,52 @@
-import openai
+import google.generativeai as genai
 import json
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
-openai.api_key = os.getenv("OPENAI_KEY")
+genai.configure(api_key=os.getenv("GEM"))
 
-if openai.api_key is None:
-    raise ValueError("OpenAI API key is missing! Please ensure it's set in your .env file as OPENAI_KEY.")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 def generate_response(profile_context, latest_query, chat_context):
     patient_profile = profile_context.get('patient_profile', 'No profile available')
     diet_chart = profile_context.get('diet_chart', 'No diet chart available')
-    
+    patient_name = profile_context.get('name', 'Patient')
+
     if not latest_query:
         return "Unable to generate response, no latest query found."
 
-    last_message = latest_query[-1].get('message', 'No message found')
+    last_message = latest_query[-1].get('content', 'No message found')
 
     prompt = f"""
-    You are a healthcare AI specializing in dietary management. 
-    You have the following patient information:
-    
-    Patient profile: {patient_profile}
-    Diet chart: {diet_chart}
+    You are a healthcare AI with expertise in dietary management. Your goal is to provide personalized feedback based on the patient’s profile and recent activities.
 
-    The patient just sent a message: {last_message}
+    Here is the patient's information:
+    - **Patient Name**: {patient_name}
+    - **Patient Profile**: {patient_profile}
+    - **Diet Chart**: {diet_chart}
 
-    Please analyze the message, understand the context from the chat history, 
-    and provide an appropriate, personalized response based on their diet and medical conditions.
+    Recent patient activities include:
+    {latest_query}
+
+    The latest message from the patient is:
+    {last_message}
+
+    Please generate a response that:
+    1. **Acknowledges** the patient’s latest action or message positively, using their name.
+    2. **Provides specific feedback** on any dietary deviations or comments related to the patient's recent messages or actions.
+    3. **Offers practical advice** tailored to the patient’s diet and health goals, including any relevant suggestions or encouragement.
+    4. **Maintains a supportive and professional tone** throughout the response.
+
+    Ensure the response is clear and concise, directly addressing the patient’s situation and offering valuable guidance.
     """
 
+    
+
     try:
-        response = openai.Completion.create(
-            engine="gpt-3.5-turbo",
-            prompt=prompt,
-            max_tokens=150,
-            temperature=0.7,  
-            stop=["\n"]  #
-        )
-
-        return response.choices[0].text.strip()
-
+        response = model.generate_content([prompt])
+        return response.text.strip()
     except Exception as e:
         return f"Error generating response: {str(e)}"
 
@@ -53,20 +57,21 @@ except FileNotFoundError:
     print("input.json file not found.")
     exit(1)
 
+print("Generating response, please wait...")
 output_data = []
 
 for query_obj in input_data:
     ticket_id = query_obj['chat_context'].get('ticket_id', 'No ticket ID')
     latest_query = query_obj.get('latest_query', [])
-    ideal_response = query_obj.get('ideal_response', 'No ideal response provided')
+    profile_context = query_obj.get('profile_context', {})
+    chat_context = query_obj.get('chat_context', {})
 
-    generated_response = generate_response(query_obj['profile_context'], latest_query, query_obj['chat_context'])
+    generated_response = generate_response(profile_context, latest_query, chat_context)
 
     output_data.append({
         'ticket_id': ticket_id,
         'latest_query': latest_query,
-        'generated_response': generated_response,
-        'ideal_response': ideal_response
+        'generated_response': generated_response
     })
 
 with open('output.json', 'w') as f:
