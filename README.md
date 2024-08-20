@@ -28,5 +28,6 @@ This project utilizes OpenAI's language models for meal analysis. The setup invo
 Make sure to install the required packages using:
 
 ```bash
-pip install openai requests python-dotenv
+pip install -r requirements.txt
+
 ```
