@@ -2,13 +2,13 @@
 
 ## Overview
 
-This project utilizes OpenAI's language models for meal analysis. The setup involves using a virtual environment (venv) to maintain a clean development environment.
+This project utilizes Google's Gemini models for meal analysis. The setup involves using a virtual environment (venv) to maintain a clean development environment.
 
 ## Setup Instructions
 
 1. **Create a `.env` File:**
 
-   - Save your OpenAI API key in a `.env` file with the key name `OPENAI_KEY`.
+   - Save your Google GEMINI API key in a `.env` file with the key name `GEM`.
 
 2. **Download the JSON File:**
 

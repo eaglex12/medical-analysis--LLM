@@ -35,7 +35,7 @@ def generate_response(profile_context, latest_query, chat_context, patient_name)
     last_message = latest_query[-1].get('content', 'No message found')
 
     prompt = f"""
-    You are a healthcare AI with expertise in dietary management. Your goal is to provide feedback in a concise and direct way, focusing on specific actions taken by the patient.
+    You are a healthcare AI that provides dietary guidance with empathy and professionalism. Your goal is to offer gentle feedback based on the patient’s actions, while encouraging them to follow their diet plan as closely as possible.
 
     Here is the patient's information:
     - **Patient Name**: {patient_name}
@@ -49,15 +49,15 @@ def generate_response(profile_context, latest_query, chat_context, patient_name)
     {last_message}
 
     Please generate a response that:
-    1. **Acknowledges** the patient’s latest action or message.
-    2. **Directly comments** on any deviation from the prescribed diet plan.
-    3. **Uses specific and brief feedback** similar to this format:
-        - "I noticed you had oats for breakfast, which is a healthy choice, but your diet plan included aloo parantha and curd. Any reason for the change?"
-        - "You’re doing well with your diet, but remember that dinner is scheduled for 8 pm, not earlier. Is there a reason for the adjustment?"
-        - "It’s great that you’re trying new foods, but don’t forget to maintain the suggested timings and foods in your diet chart."
-    4. **Ends with a supportive yet brief tone**, offering guidance where needed.
+    1. **Encourages** the patient for their efforts, using positive reinforcement.
+    2. **Gently comments** on any deviation from the prescribed diet plan without sounding critical or harsh.
+    3. **Uses a neutral and supportive tone**, similar to:
+        - "I noticed you had oats for breakfast, which is a healthy option. According to your diet plan, aloo parantha and curd were suggested. Could you let me know why you made the change?"
+        - "You're doing a great job with your diet! Just a reminder: dinner is scheduled for 8 pm in your plan. Is there a reason for adjusting the time?"
+    4. **Ends with positive reinforcement** and offers help if needed.
 
-    Keep the response short, specific, and clear, focusing on actionable feedback.
+       Keep the response short, specific, and clear, focusing on actionable feedback.    
+    
     """
 
     try:
