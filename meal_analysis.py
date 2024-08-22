@@ -4,16 +4,13 @@ from dotenv import load_dotenv
 import os
 import re
 
-# Load environment variables
 load_dotenv()
 
-# Configure the Google Generative AI API
 api_key = os.getenv("GEM")
 if not api_key:
     raise ValueError("API key for Google Generative AI is not set in the environment variables.")
 genai.configure(api_key=api_key)
 
-# Initialize the generative model
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 def extract_name_from_ideal_response(ideal_response):
@@ -21,7 +18,6 @@ def extract_name_from_ideal_response(ideal_response):
     Extract the patient name from the ideal_response text.
     Assumes the name is mentioned after a specific pattern, e.g., 'Varsha'.
     """
-    # Improved pattern to find names; assumes names are capitalized
     matches = re.findall(r'\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)?\b', ideal_response)
     return matches[0] if matches else 'Patient'
 
@@ -98,7 +94,6 @@ def main():
         latest_query = query_obj.get('latest_query', [])
         ideal_response = query_obj.get('ideal_response', 'No ideal response provided')
         
-        # Extract patient name from the ideal response
         patient_name = extract_name_from_ideal_response(ideal_response)
         
         generated_response = generate_response(query_obj['profile_context'], latest_query, query_obj['chat_context'], patient_name)

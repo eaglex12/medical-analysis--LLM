@@ -9,7 +9,6 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 
 prompt = "Write a story about a magic backpack."
 
-# Generate content
 try:
     response = model.generate_content([prompt])
     print("Generated Response:")
